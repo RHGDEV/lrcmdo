@@ -17,6 +17,18 @@ module.exports = Structures.extend('Guild', Guild => {
 			 * @private
 			 */
 			this._commandPrefix = null;
+			/**
+			 * Short cut to the guild color
+			 * @name CommandoGuild#color
+			 * @type {?string}
+			 */
+			this.color = null;
+			/**
+			 * Short cut to the guild currency
+			 * @name CommandoGuild#currency
+			 * @type {string}
+			 */
+			this.currency = "$";
 		}
 
 		/**

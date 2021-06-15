@@ -194,7 +194,7 @@ class CommandDispatcher {
 	 */
 	inhibit(cmdMsg) {
 		for(const inhibitor of this.inhibitors) {
-			let inhibit = inhibitor(cmdMsg);
+			let inhibit = await inhibitor(cmdMsg);
 			if(inhibit) {
 				if(typeof inhibit !== 'object') inhibit = { reason: inhibit, response: undefined };
 
