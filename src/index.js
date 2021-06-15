@@ -10,8 +10,6 @@ module.exports = {
 	ArgumentCollector: require('./commands/collector'),
 	Argument: require('./commands/argument'),
 	ArgumentType: require('./types/base'),
-	FriendlyError: require('./errors/friendly'),
-	CommandFormatError: require('./errors/command-format'),
 
 	util: require('./util'),
 	version: require('../package').version,

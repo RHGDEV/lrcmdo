@@ -1,7 +1,6 @@
 const { Structures, escapeMarkdown, splitMessage, resolveString } = require('discord.js');
 const { oneLine } = require('common-tags');
 const Command = require('../commands/base');
-const CommandFormatError = require('../errors/command-format');
 
 module.exports = Structures.extend('Message', Message => {
 	/**
@@ -194,8 +193,8 @@ module.exports = Structures.extend('Message', Message => {
 				if(collResult.cancelled) {
 					if(collResult.prompts.length === 0 || collResult.cancelled === 'promptLimit') {
 						this.client.emit('commandCancel', this.command, collResult.cancelled, this, collResult);
-						const err = new CommandFormatError(this);
-						return this.reply(err.message);
+						//const err = new CommandFormatError(this);
+						//return this.reply(err.message);
 					}
 					/**
 					 * Emitted when a command is cancelled (either by typing 'cancel' or not responding in time)
