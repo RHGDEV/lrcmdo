@@ -1,7 +1,6 @@
 const { Structures, escapeMarkdown, splitMessage, resolveString } = require('discord.js');
 const { oneLine } = require('common-tags');
 const Command = require('../commands/base');
-const FriendlyError = require('../errors/friendly');
 const CommandFormatError = require('../errors/command-format');
 
 module.exports = Structures.extend('Message', Message => {
@@ -256,11 +255,7 @@ module.exports = Structures.extend('Message', Message => {
 				 */
 				this.client.emit('commandError', this.command, err, this, args, fromPattern, collResult);
 				if(this.channel.typingCount > typingCount) this.channel.stopTyping();
-				if(err instanceof FriendlyError) {
-					return this.reply(err.message);
-				} else {
-					return this.command.onError(err, this, args, fromPattern, collResult);
-				}
+				return this.command.onError(err, this, args, fromPattern, collResult);
 			}
 		}
 
