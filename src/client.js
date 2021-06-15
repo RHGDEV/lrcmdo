@@ -1,7 +1,6 @@
 const discord = require('discord.js');
 const CommandoRegistry = require('./registry');
 const CommandDispatcher = require('./dispatcher');
-const GuildSettingsHelper = require('./providers/helper');
 
 /**
  * Discord.js Client with a command framework
@@ -39,18 +38,6 @@ class CommandoClient extends discord.Client {
 		 * @type {CommandDispatcher}
 		 */
 		this.dispatcher = new CommandDispatcher(this, this.registry);
-
-		/**
-		 * The client's setting provider
-		 * @type {?SettingProvider}
-		 */
-		this.provider = null;
-
-		/**
-		 * Shortcut to use setting provider methods for the global settings
-		 * @type {GuildSettingsHelper}
-		 */
-		this.settings = new GuildSettingsHelper(this, null);
 
 		/**
 		 * Internal global command prefix, controlled by the {@link CommandoClient#commandPrefix} getter/setter
@@ -132,43 +119,8 @@ class CommandoClient extends discord.Client {
 		throw new RangeError('The client\'s "owner" option is an unknown value.');
 	}
 
-	/**
-	 * Sets the setting provider to use, and initialises it once the client is ready
-	 * @param {SettingProvider|Promise<SettingProvider>} provider Provider to use
-	 * @return {Promise<void>}
-	 */
-	async setProvider(provider) {
-		const newProvider = await provider;
-		this.provider = newProvider;
-
-		if(this.readyTimestamp) {
-			this.emit('debug', `Provider set to ${newProvider.constructor.name} - initialising...`);
-			await newProvider.init(this);
-			this.emit('debug', 'Provider finished initialisation.');
-			return undefined;
-		}
-
-		this.emit('debug', `Provider set to ${newProvider.constructor.name} - will initialise once ready.`);
-		await new Promise(resolve => {
-			this.once('ready', () => {
-				this.emit('debug', `Initialising provider...`);
-				resolve(newProvider.init(this));
-			});
-		});
-
-		/**
-		 * Emitted upon the client's provider finishing initialisation
-		 * @event CommandoClient#providerReady
-		 * @param {SettingProvider} provider - Provider that was initialised
-		 */
-		this.emit('providerReady', provider);
-		this.emit('debug', 'Provider finished initialisation.');
-		return undefined;
-	}
-
 	async destroy() {
 		await super.destroy();
-		if(this.provider) await this.provider.destroy();
 	}
 }
 

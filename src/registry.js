@@ -268,37 +268,19 @@ class CommandoRegistry {
 	 * Registers the default argument types, groups, and commands. This is equivalent to:
 	 * ```js
 	 * registry.registerDefaultTypes()
-	 * 	.registerDefaultGroups()
 	 * 	.registerDefaultCommands();
 	 * ```
 	 * @return {CommandoRegistry}
 	 */
 	registerDefaults() {
 		this.registerDefaultTypes();
-		this.registerDefaultGroups();
 		this.registerDefaultCommands();
 		return this;
 	}
 
 	/**
-	 * Registers the default groups ("util" and "commands")
-	 * @return {CommandoRegistry}
-	 */
-	registerDefaultGroups() {
-		return this.registerGroups([
-			['commands', 'Commands', true],
-			['util', 'Utility']
-		]);
-	}
-
-	/**
 	 * Registers the default commands to the registry
 	 * @param {Object} [commands] - Object specifying which commands to register
-	 * @param {boolean} [commands.help=true] - Whether to register the built-in help command
-	 * (requires "util" group and "string" type)
-	 * @param {boolean} [commands.prefix=true] - Whether to register the built-in prefix command
-	 * (requires "util" group and "string" type)
-	 * @param {boolean} [commands.eval=true] - Whether to register the built-in eval command
 	 * (requires "util" group and "string" type)
 	 * @param {boolean} [commands.ping=true] - Whether to register the built-in ping command (requires "util" group)
 	 * @param {boolean} [commands.unknownCommand=true] - Whether to register the built-in unknown command
@@ -309,14 +291,8 @@ class CommandoRegistry {
 	 */
 	registerDefaultCommands(commands = {}) {
 		commands = {
-			help: true, prefix: true, ping: true, eval: true,
-			unknownCommand: true, commandState: true, ...commands
+			commandState: true, ...commands
 		};
-		if(commands.help) this.registerCommand(require('./commands/util/help'));
-		if(commands.prefix) this.registerCommand(require('./commands/util/prefix'));
-		if(commands.ping) this.registerCommand(require('./commands/util/ping'));
-		if(commands.eval) this.registerCommand(require('./commands/util/eval'));
-		if(commands.unknownCommand) this.registerCommand(require('./commands/util/unknown-command'));
 		if(commands.commandState) {
 			this.registerCommands([
 				require('./commands/commands/groups'),

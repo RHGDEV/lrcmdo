@@ -1,6 +1,5 @@
 const { Structures } = require('discord.js');
 const Command = require('../commands/base');
-const GuildSettingsHelper = require('../providers/helper');
 
 module.exports = Structures.extend('Guild', Guild => {
 	/**
@@ -10,13 +9,6 @@ module.exports = Structures.extend('Guild', Guild => {
 	class CommandoGuild extends Guild {
 		constructor(...args) {
 			super(...args);
-
-			/**
-			 * Shortcut to use setting provider methods for this guild
-			 * @type {GuildSettingsHelper}
-			 */
-			this.settings = new GuildSettingsHelper(this.client, this);
-
 			/**
 			 * Internal command prefix for the guild, controlled by the {@link CommandoGuild#commandPrefix}
 			 * getter/setter
