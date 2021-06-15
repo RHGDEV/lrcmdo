@@ -124,7 +124,7 @@ class CommandDispatcher {
 		// Run the command, or reply with an error
 		let responses;
 		if(cmdMsg) {
-			const inhibited = this.inhibit(cmdMsg);
+			const inhibited = await this.inhibit(cmdMsg);
 
 			if(!inhibited) {
 				if(cmdMsg.command) {
@@ -192,8 +192,8 @@ class CommandDispatcher {
 	 * @return {?Inhibition}
 	 * @private
 	 */
-	inhibit(cmdMsg) {
-		for(const inhibitor of this.inhibitors) {
+	async inhibit(cmdMsg) {
+		for await (const inhibitor of this.inhibitors) {
 			let inhibit = await inhibitor(cmdMsg);
 			if(inhibit) {
 				if(typeof inhibit !== 'object') inhibit = { reason: inhibit, response: undefined };
@@ -201,7 +201,7 @@ class CommandDispatcher {
 				const valid = typeof inhibit.reason === 'string' && (
 					typeof inhibit.response === 'undefined' ||
 					inhibit.response === null ||
-					isPromise(inhibit.response)
+					inhibit.response instanceof Promise
 				);
 				if(!valid) {
 					throw new TypeError(
