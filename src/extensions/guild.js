@@ -22,7 +22,7 @@ module.exports = Structures.extend('Guild', Guild => {
 			 * @name CommandoGuild#color
 			 * @type {?string}
 			 */
-			this.color = null;
+			this.color = '';
 			/**
 			 * Short cut to the guild currency
 			 * @name CommandoGuild#currency
@@ -30,6 +30,17 @@ module.exports = Structures.extend('Guild', Guild => {
 			 */
 			this.currency = "$";
 		}
+
+		/**
+		 * @returns {string}
+		 */
+		getColor() { return this.color ?? this.client.util.colors.default; };
+
+		setPrefix(thing) {
+			this.commandPrefix = thing;
+			this._commandPrefix = thing;
+			return thing;
+		};
 
 		/**
 		 * Command prefix in the guild. An empty string indicates that there is no prefix, and only mentions will be used.
