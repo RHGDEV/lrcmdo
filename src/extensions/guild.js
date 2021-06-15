@@ -34,7 +34,7 @@ module.exports = Structures.extend('Guild', Guild => {
 		/**
 		 * @returns {string}
 		 */
-		getColor() { return this.color ?? this.client.util.colors.default; };
+		getColor() { return this.color || this.client.util.colors.default; };
 
 		setPrefix(thing) {
 			this.commandPrefix = thing;
