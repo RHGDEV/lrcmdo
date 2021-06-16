@@ -131,19 +131,6 @@ module.exports = Structures.extend('Message', Message => {
 
 			// Make sure the command is usable in this context
 			if(this.command.guildOnly && !this.guild) {
-				/**
-				 * Emitted when a command is prevented from running
-				 * @event CommandoClient#commandBlock
-				 * @param {CommandoMessage} message - Command message that the command is running from
-				 * @param {string} reason - Reason that the command was blocked
-				 * (built-in reasons are `guildOnly`, `nsfw`, `permission`, `throttling`, and `clientPermissions`)
-				 * @param {Object} [data] - Additional data associated with the block. Built-in reason data properties:
-				 * - guildOnly: none
-				 * - nsfw: none
-				 * - permission: `response` ({@link string}) to send
-				 * - throttling: `throttle` ({@link Object}), `remaining` ({@link number}) time in seconds
-				 * - clientPermissions: `missing` ({@link Array}<{@link string}>) permission names
-				 */
 				this.client.emit('commandBlock', this, 'guildOnly');
 				return this.command.onBlock(this, 'guildOnly');
 			}
@@ -163,14 +150,22 @@ module.exports = Structures.extend('Message', Message => {
 			}
 
 			// Ensure the client user has the required permissions
-			if(this.channel.type === 'text' && this.command.clientPermissions) {
-				const missing = this.channel.permissionsFor(this.client.user).missing(this.command.clientPermissions);
-				if(missing.length > 0) {
-					const data = { missing };
-					this.client.emit('commandBlock', this, 'clientPermissions', data);
-					return this.command.onBlock(this, 'clientPermissions', data);
-				}
-			}
+			if (this.guild) {
+				if (this.command.clientPermissions) {
+					const missing = this.channel.permissionsFor(this.client.user).missing(this.command.clientPermissions);
+					if (missing.length > 0) {
+						this.client.emit('commandBlock', this, 'clientPermissions', { missing});
+						return this.command.onBlock(this, 'clientPermissions', { missing });
+					}
+				};
+				if (this.command.clientGuildPermissions) {
+					const missing = this.guild.me.permissions.missing(this.command.clientGuildPermissions);
+					if (missing.length !== 0) {
+						this.client.emit('commandBlock', this, 'clientPermissions', { missing})
+						return this.command.onBlock(this, 'clientPermissions', { missing });
+					}
+				};
+			};
 
 			// Throttle the command
 			const throttle = this.command.throttle(this.author.id);

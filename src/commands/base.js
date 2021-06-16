@@ -101,7 +101,7 @@ class Command {
 		 * Name of the command within the group
 		 * @type {string}
 		 */
-		this.memberName = info.memberName;
+		this.memberName = info.memberName || this.name;
 
 		/**
 		 * Short description of the command
@@ -150,6 +150,12 @@ class Command {
 		 * @type {?PermissionResolvable[]}
 		 */
 		this.userPermissions = info.userPermissions || null;
+
+		/**
+		 * Permissions required by the user to use the command.
+		 * @type {?PermissionResolvable[]}
+		 */
+		this.userGuildPermissions = info.userGuildPermissions || null;
 
 		/**
 		 * Whether the command can only be used in NSFW channels
@@ -252,7 +258,7 @@ class Command {
 		if(ownerOverride && this.client.isOwner(message.author)) return true;
 
 		if(this.ownerOnly && (ownerOverride || !this.client.isOwner(message.author))) {
-			return `The \`${this.name}\` command can only be used by the bot owner.`;
+			return `The \`${this.name}\` command can only be used by the bot creator.`;
 		}
 
 		if(message.channel.type === 'text' && this.userPermissions) {
@@ -514,8 +520,8 @@ class Command {
 		}
 		if(typeof info.group !== 'string') throw new TypeError('Command group must be a string.');
 		if(info.group !== info.group.toLowerCase()) throw new RangeError('Command group must be lowercase.');
-		if(typeof info.memberName !== 'string') throw new TypeError('Command memberName must be a string.');
-		if(info.memberName !== info.memberName.toLowerCase()) throw new Error('Command memberName must be lowercase.');
+		//if(typeof info.memberName !== 'string') throw new TypeError('Command memberName must be a string.');
+		//if(info.memberName !== info.memberName.toLowerCase()) throw new Error('Command memberName must be lowercase.');
 		if(typeof info.description !== 'string') throw new TypeError('Command description must be a string.');
 		if('format' in info && typeof info.format !== 'string') throw new TypeError('Command format must be a string.');
 		if('details' in info && typeof info.details !== 'string') throw new TypeError('Command details must be a string.');

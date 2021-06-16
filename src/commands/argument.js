@@ -181,19 +181,27 @@ class Argument {
 			}
 
 			// Prompt the user for a new value
-			prompts.push(await msg.reply(stripIndents`
-				${empty ? this.prompt : valid ? valid : `You provided an invalid ${this.label}. Please try again.`}
-				${oneLine`
-					Respond with \`cancel\` to cancel the command.
-					${wait ? `The command will automatically be cancelled in ${this.wait} seconds.` : ''}
-				`}
-			`));
+			prompts.push(await msg.embed({
+				author: {
+					name: `${msg.client.user.tag} » Information`,
+					icon_url: msg.client.user.displayAvatarURL({ dynamic: true }),
+					url: msg.client.options.invite
+				},
+				color: msg.client.getColor(msg.guild),
+				description: `${empty ? this.prompt : valid ? valid : `You provided an invalid ${this.label}. Please try again.`}`,
+				footer: {
+					text: wait ? `This will be automatically be cancelled in ${this.wait} seconds` : ""
+				},
+				fields: [
+					{
+						name: `\u200b`,
+						value: `Respond with \`cancel\` to cancel the command.`
+					}
+				]
+			}));
 
 			// Get the user's response
-			const responses = await msg.channel.awaitMessages(msg2 => msg2.author.id === msg.author.id, {
-				max: 1,
-				time: wait
-			});
+			const responses = await msg.channel.awaitMessages(msg2 => msg2.author.id === msg.author.id, { max: 1, time: wait});
 
 			// Make sure they actually answered
 			if(responses && responses.size === 1) {
@@ -264,27 +272,26 @@ class Argument {
 				}
 
 				// Prompt the user for a new value
-				if(val) {
+				const embed = {
+					author: { name: `${msg.client.user.tag} » Information`, icon_url: msg.client.user.displayAvatarURL({ dynamic: true }), url: msg.client.options.invite },
+					color: msg.client.getColor(msg.guild),
+					footer: {
+						text: wait ? `This will be automatically be cancelled in ${this.wait} seconds` : ""
+					},
+					fields: [
+						{
+							name: `\u200b`,
+							value: `Respond with **\`cancel\`** to cancel the command, or **\`finish\`** to finish entry up to this point.`
+						}
+					]
+				}
+				if (val) {
 					const escaped = escapeMarkdown(val).replace(/@/g, '@\u200b');
-					prompts.push(await msg.reply(stripIndents`
-						${valid ? valid : oneLine`
-							You provided an invalid ${this.label},
-							"${escaped.length < 1850 ? escaped : '[too long to show]'}".
-							Please try again.
-						`}
-						${oneLine`
-							Respond with \`cancel\` to cancel the command, or \`finish\` to finish entry up to this point.
-							${wait ? `The command will automatically be cancelled in ${this.wait} seconds.` : ''}
-						`}
-					`));
-				} else if(results.length === 0) {
-					prompts.push(await msg.reply(stripIndents`
-						${this.prompt}
-						${oneLine`
-							Respond with \`cancel\` to cancel the command, or \`finish\` to finish entry.
-							${wait ? `The command will automatically be cancelled in ${this.wait} seconds, unless you respond.` : ''}
-						`}
-					`));
+					embed.description = `	${valid ? valid : `You provided an invalid ${this.label}, "${escaped.length < 1850 ? escaped : '[too long to show]'}".\nPlease try again.`}`;
+					prompts.push(await msg.embed(embed));
+				} else if (results.length === 0) {
+					embed.description = this.prompt;
+					prompts.push(await msg.embed(embed));
 				}
 
 				// Get the user's response
