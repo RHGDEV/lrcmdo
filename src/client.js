@@ -1,6 +1,7 @@
-const discord = require('discord.js');
-const CommandoRegistry = require('./registry');
-const CommandDispatcher = require('./dispatcher');
+const discord = require('discord.js'),
+	CommandoRegistry = require('./registry'),
+	CommandDispatcher = require('./dispatcher'),
+	util = require("./util");
 
 /**
  * Discord.js Client with a command framework
