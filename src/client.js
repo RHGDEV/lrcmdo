@@ -39,7 +39,7 @@ class CommandoClient extends discord.Client {
 		 */
 		this.dispatcher = new CommandDispatcher(this, this.registry);
 		this.util = util
-		this.getColor = (guild) => guild?.color ?? this.util.colors.purple
+		this.getColor = (guild) => guild.color || this.util.colors.default;
 		
 		/**
 		 * Internal global command prefix, controlled by the {@link CommandoClient#commandPrefix} getter/setter
