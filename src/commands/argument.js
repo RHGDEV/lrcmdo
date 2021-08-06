@@ -201,7 +201,11 @@ class Argument {
 			}));
 
 			// Get the user's response
-			const responses = await msg.channel.awaitMessages(msg2 => msg2.author.id === msg.author.id, { max: 1, time: wait});
+			const responses = await msg.channel.awaitMessages({ 
+				filter: msg2 => msg2.author.id === msg.author.id, 
+				max: 1,
+				time: wait
+			});
 
 			// Make sure they actually answered
 			if(responses && responses.size === 1) {
@@ -295,7 +299,8 @@ class Argument {
 				}
 
 				// Get the user's response
-				const responses = await msg.channel.awaitMessages(msg2 => msg2.author.id === msg.author.id, {
+				const responses = await msg.channel.awaitMessages({ 
+					filter: msg2 => msg2.author.id === msg.author.id,
 					max: 1,
 					time: wait
 				});
