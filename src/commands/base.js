@@ -101,13 +101,13 @@ class Command {
 		 * Name of the command within the group
 		 * @type {string}
 		 */
-		this.memberName = info.memberName || this.name;
+		this.memberName = info.memberName || this.name || info.name;
 
 		/**
 		 * Short description of the command
 		 * @type {string}
 		 */
-		this.description = info.description;
+		this.description = info.description || "No Description Set";
 
 		/**
 		 * Usage format string of the command
@@ -143,19 +143,25 @@ class Command {
 		 * Permissions required by the client to use the command.
 		 * @type {?PermissionResolvable[]}
 		 */
-		this.clientPermissions = info.clientPermissions || null;
+		this.clientPermissions = info.clientPermissions || [];
+
+		/**
+		 * Permissions required by the client to use the command.
+		 * @type {?PermissionResolvable[]}
+		 */
+		this.clientGuildPermissions = info.clientGuildPermissions || [];
 
 		/**
 		 * Permissions required by the user to use the command.
 		 * @type {?PermissionResolvable[]}
 		 */
-		this.userPermissions = info.userPermissions || null;
+		this.userPermissions = info.userPermissions || [];
 
 		/**
 		 * Permissions required by the user to use the command.
 		 * @type {?PermissionResolvable[]}
 		 */
-		this.userGuildPermissions = info.userGuildPermissions || null;
+		this.userGuildPermissions = info.userGuildPermissions || [];
 
 		/**
 		 * Whether the command can only be used in NSFW channels
@@ -258,22 +264,20 @@ class Command {
 		if(ownerOverride && this.client.isOwner(message.author)) return true;
 
 		if(this.ownerOnly && (ownerOverride || !this.client.isOwner(message.author))) {
-			return `The \`${this.name}\` command can only be used by the bot creator.`;
+			return `The \`${this.name}\` command can only be used by the bot developer.`;
 		}
 
 		if(message.channel.type === 'text' && this.userPermissions) {
+			let gMissing = message.member.permissions.missing(this.userGuildPermissions);
+			if (gMissing.length !== 0) return gMissing.length === 1 ? 
+				`The \`${this.name}\` command requires you to have \`${permissions[gMissing[0]]}\` permission in the server.` :
+				`The \`${this.name}\` command requires you to have the following permissions in the server\n${gMissing.map(p => permissions[p]).join(', ')}`
+			
 			const missing = message.channel.permissionsFor(message.author).missing(this.userPermissions);
-			if(missing.length > 0) {
-				if(missing.length === 1) {
-					return `The \`${this.name}\` command requires you to have the "${permissions[missing[0]]}" permission.`;
-				}
-				return oneLine`
-					The \`${this.name}\` command requires you to have the following permissions:
-					${missing.map(perm => permissions[perm]).join(', ')}
-				`;
-			}
+			if (missing.length > 0) return missing.length === 1 ? 
+				`The \`${this.name}\` command requires you to have \`${permissions[missing[0]]}\` permission in this channel.` :
+				`The \`${this.name}\` command requires you to have the following permissions in this channel.\n${missing.map(p => permissions[p]).join(', ')}`
 		}
-
 		return true;
 	}
 
@@ -307,16 +311,11 @@ class Command {
 	 * - clientPermissions: `missing` ({@link Array}<{@link string}>) permission names
 	 * @returns {Promise<?Message|?Array<Message>>}
 	 */
-	onBlock(message, reason, data) {
+	onBlock(message, reason, data) { return // Temp Disabled
 		switch(reason) {
-			case 'guildOnly':
-				return message.reply(`The \`${this.name}\` command must be used in a server channel.`);
-			case 'nsfw':
-				return message.reply(`The \`${this.name}\` command can only be used in NSFW channels.`);
-			case 'permission': {
-				if(data.response) return message.reply(data.response);
-				return message.reply(`You do not have permission to use the \`${this.name}\` command.`);
-			}
+			case 'guildOnly': return message.reply(`The \`${this.name}\` command must be used in a server channel.`);
+			case 'nsfw': return message.reply(`The \`${this.name}\` command can only be used in NSFW channels.`);
+			case 'permission': message.reply(`${data.response ? data.response : `Command (\`${this.name}\`) you don't have permission to use.`}`);
 			case 'clientPermissions': {
 				if(data.missing.length === 1) {
 					return message.reply(
@@ -348,7 +347,7 @@ class Command {
 	 * (if applicable - see {@link Command#run})
 	 * @returns {Promise<?Message|?Array<Message>>}
 	 */
-	onError(err, message, args, fromPattern, result) { // eslint-disable-line no-unused-vars
+	onError(err, message, args, fromPattern, result) { return // Temp Disabled
 		const owners = this.client.owners;
 		const ownerList = owners ? owners.map((usr, i) => {
 			const or = i === owners.length - 1 && owners.length > 1 ? 'or ' : '';
