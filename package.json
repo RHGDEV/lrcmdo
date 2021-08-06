@@ -1,7 +1,8 @@
 {
 	"name": "lrcmdo",
-	"version": "3.0.0",
-	"description": "Commando Fork",
+	"version": "4.0.0",
+	"description": "Commando Fork to work with the RHG Services suite.",
+	"license": "",
 	"author": "RHGDev",
 	"main": "src/index",
 	"types": "./typings/index.d.ts",
@@ -14,9 +15,7 @@
 	},
 	"devDependencies": {
 		"@types/node": "^12.7.3",
-		"discord.js-docgen": "discordjs/docgen",
-		"eslint": "^6.3.0",
-		"typescript": "^3.6.2"
+		"eslint": "^7.32.0"
 	},
 	"engines": {
 		"node": ">=14.15.3"
