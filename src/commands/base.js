@@ -376,7 +376,7 @@ class Command {
 			throttle = {
 				start: Date.now(),
 				usages: 0,
-				timeout: this.client.setTimeout(() => {
+				timeout: setTimeout(() => {
 					this._throttles.delete(userID);
 				}, this.throttling.duration * 1000)
 			};
