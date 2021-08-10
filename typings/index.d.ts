@@ -374,7 +374,7 @@ declare module 'lrcmdo' {
     on(event: 'guildUpdate', listener: (oldGuild: CommandoGuild, newGuild: CommandoGuild) => void): this;
 
 
-    on(event: 'message', listener: (message: CommandoMessage) => void): this;
+    on(event: 'messageCreate', listener: (message: CommandoMessage) => void): this;
     on(event: 'messageDelete', listener: (message: CommandoMessage) => void): this;
     on(event: 'messageDeleteBulk', listener: (messages: Collection<Snowflake, CommandoMessage>) => void): this;
     on(event: 'messageUpdate', listener: (oldMessage: CommandoMessage, newMessage: CommandoMessage) => void): this;

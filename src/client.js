@@ -39,7 +39,7 @@ class CommandoClient extends discord.Client {
 		 * @type {CommandDispatcher}
 		 */
 		this.dispatcher = new CommandDispatcher(this, this.registry);
-		this.util = util
+		this.util = util;
 		this.getColor = (guild) => guild.color || this.util.colors.default;
 		
 		/**
@@ -51,7 +51,7 @@ class CommandoClient extends discord.Client {
 
 		// Set up command handling
 		const msgErr = err => { this.emit('error', err); };
-		this.on('message', message => { this.dispatcher.handleMessage(message).catch(msgErr); });
+		this.on('messageCreate', message => { this.dispatcher.handleMessage(message).catch(msgErr); });
 		this.on('messageUpdate', (oldMessage, newMessage) => {
 			this.dispatcher.handleMessage(newMessage, oldMessage).catch(msgErr);
 		});
