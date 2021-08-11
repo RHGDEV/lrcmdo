@@ -6,6 +6,7 @@ module.exports = {
 	CommandoGuild: require('./extensions/guild'),
 	CommandoMessage: require('./extensions/message'),
 	Command: require('./commands/base'),
+	SlashCommand: require('./commands/slashBase'),
 	CommandGroup: require('./commands/group'),
 	ArgumentCollector: require('./commands/collector'),
 	Argument: require('./commands/argument'),
