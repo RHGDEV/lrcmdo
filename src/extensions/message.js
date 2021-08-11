@@ -1,5 +1,5 @@
 //const { Message, escapeMarkdown, splitMessage } = require('discord.js'),
-const { Message, MessageEmbed, Util: { escapeMarkdown, splitMessage } } = require("discord.js"),
+const { Message, resolveString, Util: { escapeMarkdown, splitMessage } } = require("discord.js"),
 	{ oneLine } = require('common-tags'),
 	register = (name, value) => Message.prototype[name] = value;;
 
@@ -53,7 +53,6 @@ register("inlineReply", async function (content, options) {
 		else options.embeds = [options.embed];
 	}
 	return this.channel.send({ ...options, reply: { messageReference: this, failIfNotExists: false } })
-		.catch((e) => global.log(`[MESSAGE:INLINE_REPLY:ERROR]: ${global.__filename}`, e));
 });
 
 register("run", async function () {
@@ -238,22 +237,22 @@ register("editCurrentResponse", function (id, options) {
 			const promises = [];
 			if (response instanceof Array) {
 				for (let i = 0; i < content.length; i++) {
-					if (response.length > i) promises.push(response[i].edit({ content: `${prepend}${content[i]}`, ...options }).catch(e => global.log(`[MESSAGE:EDIT:ERROR]: ${global.__filename}`, e)));
-					else promises.push(response[0].channel.send({ content: `${prepend}${content[i]}` }).catch(e => global.log(`[MESSAGE:SEND:ERROR]: ${global.__filename}`, e)));
+					if (response.length > i) promises.push(response[i].edit({ content: `${prepend}${content[i]}`, ...options }));
+					else promises.push(response[0].channel.send({ content: `${prepend}${content[i]}` }));
 				}
 			} else {
-				promises.push(response.edit({ content: `${prepend}${content[0]}`, ...options }).catch(e => global.log(`[MESSAGE:EDIT:ERROR]: ${global.__filename}`, e)));
+				promises.push(response.edit({ content: `${prepend}${content[0]}`, ...options }));
 				for (let i = 1; i < content.length; i++) {
-					promises.push(response.channel.send({ content: `${prepend}${content[i]}` }).catch(e => global.log(`[MESSAGE:SEND:ERROR]: ${global.__filename}`, e)));
+					promises.push(response.channel.send({ content: `${prepend}${content[i]}` }));
 				}
 			}
 			return Promise.all(promises);
 		} else {
 			if (response instanceof Array) { // eslint-disable-line no-lonely-if
 				for (let i = response.length - 1; i > 0; i--) response[i].del().catch(() => null);
-				return response[0].edit({ content: `${prepend}${content}`, ...options }).catch(e => global.log(`[MESSAGE:EDIT:ERROR]: ${global.__filename}`, e))
+				return response[0].edit({ content: `${prepend}${content}`, ...options });
 			} else {
-				return response.edit({ content: `${prepend}${content}`, ...options }).catch(e => global.log(`[MESSAGE:EDIT:ERROR]: ${global.__filename}`, e))
+				return response.edit({ content: `${prepend}${content}`, ...options });
 			}
 		}
 	};
@@ -266,24 +265,27 @@ register("respond", function ({ type = 'reply', content, options, lang, fromEdit
 		if (options && options.split && typeof options.split !== 'object') options.split = {};
 	}
 
-	if (type === 'reply' && this.channel.type === 'dm') type = 'plain';
-	if (type !== 'direct' && this.guild && !this.channel.permissionsFor(this.client.user).has(global.PERMS.messages.send)) type = "direct";
 
-	content = typeof content === "string" ? content : null;
-	content = content?.replace(new RegExp(this.client.token, "g"), "[N/A]");
+	if (type === 'reply' && this.channel.type === 'dm') type = 'plain';
+	if (type !== 'direct') {
+		if (this.guild && !this.channel.permissionsFor(this.client.user).has('SEND_MESSAGES')) {
+			type = 'direct';
+		}
+	}
+
 	switch (type) {
 		case 'plain':
-			if (!shouldEdit) return this.channel.send({ content, ...options }).catch(e => global.log(`[MESSAGE:RESPOND:ERROR]: ${global.__filename}`, e))
+			if (!shouldEdit) return this.channel.send({ content, ...options })
 			return this.editCurrentResponse(this.channel.type === "dm" ? "dm" : this.channel.id, { type, content, options });
 		case 'reply':
-			if (!shouldEdit) return this.channel.send({ content, ...options }).catch(e => global.log(`[MESSAGE:RESPOND:ERROR]: ${global.__filename}`, e))
+			if (!shouldEdit) return this.channel.send({ content, ...options })
 			if (options && options.split && !options.split.prepend) options.split.prepend = `${this.author}, `;
 			return this.editCurrentResponse(this.channel.type === "dm" ? "dm" : this.channel.id, { type, content, options });
 		case 'direct':
-			if (!shouldEdit) return this.author.send({ content, ...options }).catch(e => global.log(`[MESSAGE:RESPOND:ERROR]: ${global.__filename}`, e))
+			if (!shouldEdit) return this.author.send({ content, ...options })
 			return this.editCurrentResponse('dm', { type, content, options });
 		case 'code':
-			if (!shouldEdit) return this.channel.send({ content, ...options }).catch(e => global.log(`[MESSAGE:RESPOND:ERROR]: ${global.__filename}`, e))
+			if (!shouldEdit) return this.channel.send({ content, ...options })
 			if (options && options.split) {
 				if (!options.split.prepend) options.split.prepend = `\`\`\`${lang || ''}\n`;
 				if (!options.split.append) options.split.append = '\n```';
@@ -293,6 +295,12 @@ register("respond", function ({ type = 'reply', content, options, lang, fromEdit
 		default:
 			throw new RangeError(`Unknown response type "${type}".`);
 	}
+});
+
+register("embed", function (embed, content, options) {
+	if (typeof options !== 'object') options = {};
+	options.embed = embed;
+	return this.inlineReply(content, options);
 });
 
 function parseArgs(argString, argCount, allowSingleQuote = true) {
