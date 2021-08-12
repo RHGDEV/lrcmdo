@@ -6,9 +6,11 @@ class CommandGroup {
 	 * @param {CommandoClient} client - The client the group is for
 	 * @param {string} id - The ID for the group
 	 * @param {string} [name=id] - The name of the group
+	 * @param {string} [emoji='📂'] - Emoji for the group
+	 * @param {string} [description=''] - Description for the group
 	 * @param {boolean} [guarded=false] - Whether the group should be protected from disabling
 	 */
-	constructor(client, id, name, guarded = false) {
+	constructor(client, id, name, emoji = '📂', description = '', guarded = false) {
 		if(!client) throw new Error('A client must be specified.');
 		if(typeof id !== 'string') throw new TypeError('Group ID must be a string.');
 		if(id !== id.toLowerCase()) throw new Error('Group ID must be lowercase.');
@@ -21,6 +23,7 @@ class CommandGroup {
 		 */
 		Object.defineProperty(this, 'client', { value: client });
 
+
 		/**
 		 * ID of this group
 		 * @type {string}
@@ -32,6 +35,18 @@ class CommandGroup {
 		 * @type {string}
 		 */
 		this.name = name || id;
+
+		/**
+		 * Emoji of this group
+		 * @type {string}
+		 */
+		this.emoji = emoji;
+
+		/**
+		 * Description of this group
+		 * @type {string}
+		 */
+		this.description = description;
 
 		/**
 		 * The commands in this group (added upon their registration)

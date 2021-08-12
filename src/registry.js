@@ -53,17 +53,19 @@ class CommandoRegistry {
 	 * Registers a single group
 	 * @param {CommandGroup|Function|Object|string} group - A CommandGroup instance, a constructor, or the group ID
 	 * @param {string} [name] - Name for the group (if the first argument is the group ID)
+	 * @param {string} [emoji] - Emoji for the group
+	 * @param {string} [description] - Description for the group
 	 * @param {boolean} [guarded] - Whether the group should be guarded (if the first argument is the group ID)
 	 * @return {CommandoRegistry}
 	 * @see {@link CommandoRegistry#registerGroups}
 	 */
-	registerGroup(group, name, guarded) {
+	registerGroup(group, name, emoji, description, guarded) {
 		if(typeof group === 'string') {
-			group = new CommandGroup(this.client, group, name, guarded);
+			group = new CommandGroup(this.client, group, name, emoji, description, guarded);
 		} else if(isConstructor(group, CommandGroup)) {
 			group = new group(this.client); // eslint-disable-line new-cap
 		} else if(typeof group === 'object' && !(group instanceof CommandGroup)) {
-			group = new CommandGroup(this.client, group.id, group.name, group.guarded);
+			group = new CommandGroup(this.client, group.id, group.name, group.emoji, group.description, group.guarded);
 		}
 
 		const existing = this.groups.get(group.id);
@@ -93,13 +95,13 @@ class CommandoRegistry {
 	 * @return {CommandoRegistry}
 	 * @example
 	 * registry.registerGroups([
-	 * 	['fun', 'Fun'],
-	 * 	['mod', 'Moderation']
+	 * 	['fun', 'Fun', '🎉', 'Fun Group'],
+	 * 	['mod', 'Moderation', '🔨', 'Mod Group']
 	 * ]);
 	 * @example
 	 * registry.registerGroups([
-	 * 	{ id: 'fun', name: 'Fun' },
-	 * 	{ id: 'mod', name: 'Moderation' }
+	 * 	{ id: 'fun', name: 'Fun', emoji: '🎉', desc: 'Fun Group'},
+	 * 	{ id: 'mod', name: 'Moderation', emoji: '🔨' desc: 'Mod Group'}
 	 * ]);
 	 */
 	registerGroups(groups) {
@@ -201,6 +203,32 @@ class CommandoRegistry {
 	}
 
 	/**
+	 * Registers all events in a directory.
+	 * @param {string|RequireAllOptions} options - The path to the directory, or a require-all options object
+	 * @example
+	 * const path = require('path');
+	 * registry.registerEventsIn(path.join(__dirname, 'events'));
+	 */
+	registerEventsIn(options) {
+		const obj = require('require-all')(options);
+		Object.entries(obj).forEach(entry => {
+			// eslint-disable-next-line no-unused-vars
+			const [group, files] = entry;
+			// eslint-disable-next-line no-shadow
+			Object.entries(files).forEach(entry => {
+				const [eName, funcs] = entry;
+				this.client.on(eName, (...a) => {
+					try {
+						funcs.run(this.client, ...a);
+					} catch(err) {
+						this.client.emit('warn', err.stack);
+					}
+				});
+			});
+		});
+	}
+
+	/**
 	 * Registers a single argument type
 	 * @param {ArgumentType|Function} type - Either an ArgumentType instance, or a constructor for one
 	 * @return {CommandoRegistry}
@@ -265,24 +293,22 @@ class CommandoRegistry {
 	}
 
 	/**
-	 * Registers the default argument types, groups, and commands. This is equivalent to:
-	 * ```js
-	 * registry.registerDefaultTypes()
-	 * 	.registerDefaultCommands();
-	 * ```
-	 * @return {CommandoRegistry}
+	 * Registers the default argument types, groups, commands.
+	 * Also registers the default commands and events folder.
+	 * @param {string} [dir] - Base directory (__dirname)
 	 */
-	registerDefaults() {
+	registerDefaults(dir) {
 		this.registerDefaultTypes();
+		this.registerGroup('commands', 'Commands', '📂', null, true);
 		this.registerDefaultCommands();
-		return this;
+		this.registerCommandsIn(path.join(dir, 'commands'));
+		this.registerEventsIn(path.join(dir, 'events'));
 	}
 
 	/**
 	 * Registers the default commands to the registry
 	 * @param {Object} [commands] - Object specifying which commands to register
 	 * (requires "util" group and "string" type)
-	 * @param {boolean} [commands.ping=true] - Whether to register the built-in ping command (requires "util" group)
 	 * @param {boolean} [commands.unknownCommand=true] - Whether to register the built-in unknown command
 	 * (requires "util" group)
 	 * @param {boolean} [commands.commandState=true] - Whether to register the built-in command state commands
