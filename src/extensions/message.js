@@ -68,22 +68,22 @@ register("run", async function () {
 
 	// Make sure the command is usable in this context
 	if (this.command.guildOnly && !this.guild) {
-		this.client.emit('commandBlock', this, 'guildOnly');
-		return this.command.onBlock(this, 'guildOnly');
+		return this.client.emit('commandBlock', this, 'guildOnly');
+		//return this.command.onBlock(this, 'guildOnly');
 	}
 
 	// Ensure the channel is a NSFW one if required
 	if (this.command.nsfw && !this.channel.nsfw) {
-		this.client.emit('commandBlock', this, 'nsfw');
-		return this.command.onBlock(this, 'nsfw');
+		return this.client.emit('commandBlock', this, 'nsfw');
+		//return this.command.onBlock(this, 'nsfw');
 	}
 
 	// Ensure the user has permission to use the command
 	const hasPermission = this.command.hasPermission(this);
 	if (!hasPermission || typeof hasPermission === 'string') {
 		const data = { response: typeof hasPermission === 'string' ? hasPermission : undefined };
-		this.client.emit('commandBlock', this, 'permission', data);
-		return this.command.onBlock(this, 'permission', data);
+		return this.client.emit('commandBlock', this, 'permission', data);
+		//return this.command.onBlock(this, 'permission', data);
 	}
 
 	// Ensure the client user has the required permissions
@@ -91,15 +91,15 @@ register("run", async function () {
 		if (this.command.clientPermissions) {
 			const missing = this.channel.permissionsFor(this.client.user).missing(this.command.clientPermissions);
 			if (missing.length > 0) {
-				this.client.emit('commandBlock', this, 'clientPermissions', { missing });
-				return this.command.onBlock(this, 'clientPermissions', { missing });
+				return this.client.emit('commandBlock', this, 'clientPermissions', { missing });
+				//return this.command.onBlock(this, 'clientPermissions', { missing });
 			}
 		};
 		if (this.command.clientGuildPermissions) {
 			const missing = this.guild.me.permissions.missing(this.command.clientGuildPermissions);
 			if (missing.length !== 0) {
-				this.client.emit('commandBlock', this, 'clientPermissions', { missing })
-				return this.command.onBlock(this, 'clientPermissions', { missing });
+				return this.client.emit('commandBlock', this, 'clientPermissions', { missing })
+				//return this.command.onBlock(this, 'clientPermissions', { missing });
 			}
 		};
 	};
@@ -109,8 +109,8 @@ register("run", async function () {
 	if (throttle && throttle.usages + 1 > this.command.throttling.usages) {
 		const remaining = (throttle.start + (this.command.throttling.duration * 1000) - Date.now()) / 1000;
 		const data = { throttle, remaining };
-		this.client.emit('commandBlock', this, 'throttling', data);
-		return this.command.onBlock(this, 'throttling', data);
+		return this.client.emit('commandBlock', this, 'throttling', data);
+		// return this.command.onBlock(this, 'throttling', data);
 	}
 
 	// Figure out the command arguments
@@ -184,9 +184,9 @@ register("run", async function () {
 		 * @param {?ArgumentCollectorResult} result - Result from obtaining the arguments from the collector
 		 * (if applicable - see {@link Command#run})
 		 */
-		this.client.emit('commandError', this.command, err, this, args, fromPattern, collResult);
 		if (this.channel.typingCount > typingCount) this.channel.stopTyping();
-		return this.command.onError(err, this, args, fromPattern, collResult);
+		return this.client.emit('commandError', this.command, err, this, args, fromPattern, collResult);
+		//return this.command.onError(err, this, args, fromPattern, collResult);
 	}
 })
 

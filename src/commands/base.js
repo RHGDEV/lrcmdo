@@ -311,7 +311,7 @@ class Command {
 	 * - clientPermissions: `missing` ({@link Array}<{@link string}>) permission names
 	 * @returns {Promise<?Message|?Array<Message>>}
 	 */
-	onBlock(message, reason, data) { return // Temp Disabled
+	onBlock(message, reason, data) {
 		switch(reason) {
 			case 'guildOnly': return message.reply(`The \`${this.name}\` command must be used in a server channel.`);
 			case 'nsfw': return message.reply(`The \`${this.name}\` command can only be used in NSFW channels.`);
@@ -347,7 +347,7 @@ class Command {
 	 * (if applicable - see {@link Command#run})
 	 * @returns {Promise<?Message|?Array<Message>>}
 	 */
-	onError(err, message, args, fromPattern, result) { return // Temp Disabled
+	onError(err, message, args, fromPattern, result) {
 		const owners = this.client.owners;
 		const ownerList = owners ? owners.map((usr, i) => {
 			const or = i === owners.length - 1 && owners.length > 1 ? 'or ' : '';
